@@ -8,7 +8,6 @@ package client.control;
 import model.FriendsList;
 import model.Users;
 import client.view.ChallengeFrm;
-import client.view.ViewGame;
 import client.view.ViewGameFrm;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -139,8 +138,9 @@ public class ClientControl extends Thread{
                 ViewGameFrm game=null;
                 String rq = ois.readUTF();
                 if (rq.equals("online user")) {
-                    FriendsList fl = (FriendsList) ois.readObject();
-                    setModel(fl);
+                    Users u1 = (Users) ois.readObject();
+//                    FriendsList fl = (FriendsList) ois.readObject();
+                    setModel(u1);
                 } else if (rq.equals("Add friend successfully")) {
                     JOptionPane.showMessageDialog(tblFriends, rq);
                 } else if (rq.equals("Add friend fail")) {
@@ -242,15 +242,15 @@ public class ClientControl extends Thread{
         }
     }
 
-    public void setModel(FriendsList fl) {
+    public void setModel(Users ul) {
         vcData = new Vector();
-        ArrayList<Users> lf = fl.getLf();
+        ArrayList<Users> lu = ul.getLu();
         vcHead = new Vector();
         vcHead.add("Player");
         vcHead.add("Points");
         vcHead.add("Status");
-        for (Users u : lf) {
-            if (u.getHoten() != getUser().getHoten()) {
+        for (Users u : lu) {
+            if (u.getHoten() != getUser().getHoten() && u.getId()!= this.getUser().getId()) {
                 Vector row = new Vector();
                 row.add(u.getHoten());
                 row.add(u.getPoints());
@@ -267,7 +267,5 @@ public class ClientControl extends Thread{
         }
         tblFriends.setModel(new DefaultTableModel(vcData, vcHead));
         tblFriends.setEnabled(true);
-
     }
-
 }

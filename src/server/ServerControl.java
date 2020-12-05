@@ -110,9 +110,9 @@ public class ServerControl {
             for (Map.Entry<String, Handler> entry : clientMap.entrySet()) {
                 Handler value = entry.getValue();
                 value.getOos().writeUTF("online user");
-                FriendsList fl = new FriendsList(value.getUser());
-                fl.setLf(db.listFr(value.getUser()));
-                value.getOos().writeObject(fl);
+                Users ul = new Users();
+                ul.setLu(db.listUsers());
+                value.getOos().writeObject(ul);
                 value.getOos().flush();
             }
         } catch (Exception e) {

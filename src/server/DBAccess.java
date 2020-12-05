@@ -32,7 +32,7 @@ import java.util.logging.Logger;
             String dbURL = "jdbc:mysql://localhost:3306/btl";
         //    String dbClass = "com.mysql.jdbc.Driver";
          //   Class.forName(dbClass);
-            con = DriverManager.getConnection(dbURL, "root", "142871134");
+            con = DriverManager.getConnection(dbURL, "root", "");
 
 //        } catch (ClassNotFoundException ex) {
 //            Logger.getLogger(DBAccess.class.getName()).log(Level.SEVERE, null, ex);
@@ -112,27 +112,16 @@ import java.util.logging.Logger;
         return false;
     }
 
-    public ArrayList<Users> listFr(Users u) {
-        String sql1 = "SELECT * FROM isfriend,users WHERE users.id=isfriend.id1 AND users.id=?";
-        String sql2 = "SELECT * FROM isfriend,users WHERE users.id=isfriend.id2 AND users.id=?";
-        ArrayList<Users> lf = new ArrayList<>();
+    public ArrayList<Users> listUsers() {
+        String sql1 = "SELECT * FROM users";
+        ArrayList<Users> lu = new ArrayList<>();
         try {
             PreparedStatement ps1 = con.prepareStatement(sql1);
-            ps1.setInt(1, u.getId());
             ResultSet rs1 = ps1.executeQuery();
             ArrayList<Integer> temp1 = new ArrayList<>();
             while (rs1.next()) {
-                temp1.add(rs1.getInt("id2"));
+                temp1.add(rs1.getInt("id"));
                 //System.out.println(rs1.getInt("id2"));
-            }
-
-            PreparedStatement ps2 = con.prepareStatement(sql2);
-            ps2.setInt(1, u.getId());
-            ResultSet rs2 = ps2.executeQuery();
-
-            while (rs2.next()) {
-                temp1.add(rs2.getInt("id1"));
-                //System.out.println(rs2.getInt("id1"));
             }
             for (Integer i : temp1) {
                 String sql3 = "SELECT * FROM users  WHERE id=?";
@@ -141,18 +130,19 @@ import java.util.logging.Logger;
                 ResultSet rs3 = ps3.executeQuery();
                 if (rs3.next()) {
                     Users u3 = new Users();
+                    u3.setId(rs3.getInt("id"));
                     u3.setHoten(rs3.getString("hoten"));
                     u3.setPoints(rs3.getFloat("points"));
                     u3.setIsOnl(rs3.getInt("isOnl"));
                     u3.setStatus(rs3.getInt("status"));
                     //System.out.println(u3.getHoten());
-                    lf.add(u3);
+                    lu.add(u3);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return lf;
+        return lu;
     }
 
     public void logOut(Users p) {
