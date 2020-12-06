@@ -32,7 +32,7 @@ import java.util.logging.Logger;
             String dbURL = "jdbc:mysql://localhost:3306/btl";
         //    String dbClass = "com.mysql.jdbc.Driver";
          //   Class.forName(dbClass);
-            con = DriverManager.getConnection(dbURL, "root", "");
+            con = DriverManager.getConnection(dbURL, "root", "142871134");
 
 //        } catch (ClassNotFoundException ex) {
 //            Logger.getLogger(DBAccess.class.getName()).log(Level.SEVERE, null, ex);

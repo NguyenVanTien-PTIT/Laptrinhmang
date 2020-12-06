@@ -136,7 +136,7 @@ public class LoginView extends javax.swing.JFrame {
      * @param args the commbtnSignupand lbtnLoginine arguments
      */
     
-
+ 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLogin;
     private javax.swing.JButton btnSignup;
