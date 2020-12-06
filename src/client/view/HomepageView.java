@@ -136,7 +136,6 @@ public class HomepageView extends javax.swing.JFrame{
         jTextArea1 = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jSplitPane2 = new javax.swing.JSplitPane();
         lbName = new JTextField("Name: ");
         lbPoints = new javax.swing.JTextField();
         tblPanel = new javax.swing.JPanel();
@@ -290,21 +289,18 @@ public class HomepageView extends javax.swing.JFrame{
                             .addComponent(lbPoints)
                             .addComponent(lbName)
                             .addComponent(btnBXH, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addGap(18, 18, 18)
-                .addComponent(jSplitPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(136, 136, 136)
+                        .addGap(166, 166, 166)
                         .addComponent(jLabel1)
                         .addContainerGap(143, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(36, 36, 36)
                         .addComponent(tblPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane2)
             .addGroup(layout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -333,10 +329,10 @@ public class HomepageView extends javax.swing.JFrame{
     private void btnBXHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBXHActionPerformed
         // TODO add your handling code here:
         JOptionPane.showMessageDialog(rootPane, "BXH");
-        ViewBXH vbxh= new ViewBXH(control);
+        ViewBXH vbxh= new ViewBXH();
         vbxh.setVisible(true);
         vbxh.setLocationRelativeTo(rootPane);
-        this.dispose();
+  //      this.dispose();
                                             
 
     }//GEN-LAST:event_btnBXHActionPerformed
@@ -354,7 +350,6 @@ public class HomepageView extends javax.swing.JFrame{
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JSplitPane jSplitPane2;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
     private javax.swing.JTable jTable3;
