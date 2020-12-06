@@ -4,8 +4,6 @@
  * and open the template in the editor.
  */
 package client.control;
-//import View.GameFrm;
-import model.FriendsList;
 import model.Users;
 import client.view.ChallengeFrm;
 import client.view.ViewGameFrm;
@@ -16,6 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -24,7 +23,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import model.Card;
 
 /**
  *
@@ -40,7 +38,6 @@ public class ClientControl extends Thread{
     Vector vcData;
     Vector vcHead;
     JTable tblFriends;
-    
     public Users getUser() {
         return user;
     }
@@ -153,7 +150,7 @@ public class ClientControl extends Thread{
                     ChallengeFrm c = new ChallengeFrm();
                     c.setVisible(true);
                     c.setLocationRelativeTo(tblFriends);
-                    c.getTxt1().setText(c.getTxt1().getText()+user.getHoten());
+                    c.getTxt1().setText(c.getTxt1().getText()+thisu.getUsername());
                     c.getYes().addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
@@ -173,7 +170,7 @@ public class ClientControl extends Thread{
                         }
                     });
                     
-                } else if(rq.equals("accept1")){
+                } else if(rq.equals("begin")){
 //                    System.out.println("loading game...");
 //                    Users u=(Users) ois.readObject();
 //                    //JOptionPane.showMessageDialog(tblFriends, "READY?");
@@ -208,30 +205,20 @@ public class ClientControl extends Thread{
 //                        }
 //                    }
                    System.out.println("loading game...");
-                    Users u=(Users) ois.readObject();
-                    //JOptionPane.showMessageDialog(tblFriends, "READY?");
-                    Card card=(Card) ois.readObject();
-                    game=new ViewGameFrm();
+                   Users u1 = (Users) ois.readObject();
+                   //sai ngay o day
+                   List<Integer> a = (List<Integer>) ois.readObject();
+                   Integer img = (Integer) ois.readObject();
+                    game=new ViewGameFrm(u1, ois, oos, a, img);
                     //game.init(card.getList1());
                   //  game = new GameFrm(mt);
-                   // game.setLbname("Name: "+u.getHoten());
-                    game.setVisible(true);
-                    game.setLocationRelativeTo(tblFriends);
-                }else if(rq.equals("accept2")){
-                    System.out.println("loading game...");
-                    Users u=(Users) ois.readObject();
-                    //JOptionPane.showMessageDialog(tblFriends, "READY?");
-                    Card card=(Card) ois.readObject();
-                    game=new ViewGameFrm();
-                  //  game.init(card.getList2());
-                  //  game = new GameFrm(mt);
-                   // game.setLbname("Name: "+u.getHoten());
+                   // game.setLbname("Name: "+u.getUsername());
                     game.setVisible(true);
                     game.setLocationRelativeTo(tblFriends);
                 }
                 else if(rq.equals("not accept")){
                     Users u=(Users) ois.readObject();
-                    JOptionPane.showMessageDialog(tblFriends, u.getHoten()+" has refused your challenge!");
+                    JOptionPane.showMessageDialog(tblFriends, u.getUsername()+" has refused your challenge!");
                 }
 //                else if(rq.equals("Wait")){
 //                    JOptionPane.showMessageDialog(tblFriends, "Wait For the opponent...");
@@ -250,9 +237,9 @@ public class ClientControl extends Thread{
         vcHead.add("Points");
         vcHead.add("Status");
         for (Users u : lu) {
-            if (u.getHoten() != getUser().getHoten() && u.getId()!= this.getUser().getId()) {
+            if (u.getUsername() != getUser().getUsername() && u.getId()!= this.getUser().getId()) {
                 Vector row = new Vector();
-                row.add(u.getHoten());
+                row.add(u.getUsername());
                 row.add(u.getPoints());
                 if (u.getIsOnl() == 1) {
                     row.add("Online");

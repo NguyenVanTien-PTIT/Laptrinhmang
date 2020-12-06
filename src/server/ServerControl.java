@@ -6,8 +6,10 @@
 package server;
 //import Model.Matranhinh;
 import java.awt.Button;
+import java.awt.Color;
 import java.awt.Image;
-import model.FriendsList;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import model.Users;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -17,17 +19,69 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import model.Card;
 /**
  *
  * @author ----LaiNhuTung----
  */
+class MyButton extends JButton {
+
+    private boolean isLastButton;
+
+    public MyButton() {
+
+        super();
+
+        initUI();
+    }
+
+    public MyButton(Image image) {
+
+        super(new ImageIcon(image));
+
+        initUI();
+    }
+
+    private void initUI() {
+
+        isLastButton = false;
+        BorderFactory.createLineBorder(Color.gray);
+
+        addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                setBorder(BorderFactory.createLineBorder(Color.yellow));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                setBorder(BorderFactory.createLineBorder(Color.gray));
+            }
+        });
+    }
+
+    public void setLastButton() {
+        
+        isLastButton = true;
+    }
+
+    public boolean isLastButton() {
+
+        return isLastButton;
+    }
+}
+
 public class ServerControl {
      private int port = 1080;
     private ServerSocket serverSocket;
@@ -75,7 +129,7 @@ public class ServerControl {
                     
                     Handler handler = new Handler(u, lock, ois, oos);
                     handler.setSocket(client);
-                    clientMap.put(u.getHoten(), handler);
+                    clientMap.put(u.getUsername(), handler);
 
                     oos.writeUTF("Login Successfully");
                     oos.writeObject(u);
@@ -171,7 +225,14 @@ public class ServerControl {
                     if (rq.equals("log out")) {
                         Users u = (Users) ois.readObject();
                         db.logOut(u);
-                        clientMap.remove(u.getHoten());
+                        clientMap.remove(u.getUsername());
+                        updateOnlineUsers();
+                        break;
+                    }
+                    else if (rq.equals("end match")){
+                        Users u = (Users) ois.readObject();
+                        db.endMatch(u);
+                        clientMap.remove(u.getUsername());
                         updateOnlineUsers();
                         break;
                     }
@@ -181,18 +242,18 @@ public class ServerControl {
                         if (db.checkUserExist2(u)) {
                             if (db.addFriend(thisu, u)) {
                                 synchronized (lock) {
-                                    clientMap.get(thisu.getHoten()).getOos().writeUTF("Add friend successfully");
+                                    clientMap.get(thisu.getUsername()).getOos().writeUTF("Add friend successfully");
                                 }
                                 updateOnlineUsers();
                             } else {
                                 synchronized (lock) {
-                                    clientMap.get(thisu.getHoten()).getOos().writeUTF("Add friend fail");
+                                    clientMap.get(thisu.getUsername()).getOos().writeUTF("Add friend fail");
                                 }
                                 updateOnlineUsers();
                             }
                         } else {
                             synchronized (lock) {
-                                clientMap.get(thisu.getHoten()).getOos().writeUTF("Value doesn't exist");
+                                clientMap.get(thisu.getUsername()).getOos().writeUTF("Value doesn't exist");
                             }
                             updateOnlineUsers();
                         }
@@ -200,10 +261,10 @@ public class ServerControl {
                         synchronized(lock){
                             Users thisu = (Users) ois.readObject();
                             Users u = (Users) ois.readObject();
-//                            clientMap.get(thisu.getHoten()).getOos().writeUTF("challenge");
-                            clientMap.get(u.getHoten()).getOos().writeUTF("challenge");
-                            clientMap.get(u.getHoten()).getOos().writeObject(thisu);
-                            clientMap.get(u.getHoten()).getOos().writeObject(u);
+//                            clientMap.get(thisu.getUsername()).getOos().writeUTF("challenge");
+                            clientMap.get(u.getUsername()).getOos().writeUTF("challenge");
+                            clientMap.get(u.getUsername()).getOos().writeObject(thisu);
+                            clientMap.get(u.getUsername()).getOos().writeObject(u);
                         }
 //                        updateOnlineUsers();
                     } 
@@ -214,50 +275,46 @@ public class ServerControl {
 //                            Matranhinh mt = new Matranhinh(4, 31);
 //                            db.sinhngaunhien(mt);
 //                            Users u = (Users) ois.readObject();
-//                            clientMap.get(thisu.getHoten()).getOos().writeUTF("accept");
-//                            clientMap.get(thisu.getHoten()).getOos().writeObject(u);
-//                            clientMap.get(thisu.getHoten()).getOos().writeObject(mt);
-//                            clientMap.get(u.getHoten()).getOos().writeUTF("accept");
-//                            clientMap.get(u.getHoten()).getOos().writeObject(thisu);
-//                            clientMap.get(u.getHoten()).getOos().writeObject(mt);
-//                            pairs.add(new Pair<>(clientMap.get(thisu.getHoten()),clientMap.get(u.getHoten())));
+//                            clientMap.get(thisu.getUsername()).getOos().writeUTF("accept");
+//                            clientMap.get(thisu.getUsername()).getOos().writeObject(u);
+//                            clientMap.get(thisu.getUsername()).getOos().writeObject(mt);
+//                            clientMap.get(u.getUsername()).getOos().writeUTF("accept");
+//                            clientMap.get(u.getUsername()).getOos().writeObject(thisu);
+//                            clientMap.get(u.getUsername()).getOos().writeObject(mt);
+//                            pairs.add(new Pair<>(clientMap.get(thisu.getUsername()),clientMap.get(u.getUsername())));
 //                            db.updateStatus(u,2);
 //                            db.updateStatus(thisu, 2);
 //                            updateOnlineUsers();
 //                        }
                         //updateOnlineUsers();
                         synchronized(lock){
-                            ArrayList<JButton> list=new ArrayList<>();
-                            ArrayList<JButton> list1=new ArrayList<>();
-                            ArrayList<JButton> list2=new ArrayList<>();
-                            for(int i=1;i<=14;i++){
-                                JButton button;
-                                String s="src/Image/"+i+".png";
-                                button=new JButton(new ImageIcon(s));
-                                list.add(button);
-                            }
-                            Collections.shuffle(list);
-                            for(int i=0;i<14;i++){
-                                if(i<7){
-                                    list1.add(list.get(i));
+                            Set<Integer> set = new HashSet<>();
+                            Random generator = new Random();
+                            List<Integer> a = new ArrayList<>();
+                            int size = 0;
+                            while(true){
+                                Integer value = generator.nextInt(24) + 1;
+                                set.add(value);
+                                if(set.size()>size) {
+                                    a.add(value);
+                                    size = set.size();
                                 }
-                                else {
-                                    list2.add(list.get(i));
-                                }
+                                if(set.size()==24) break;
                             }
-                            Card card=new Card();
-                            card.setList(list);
-                            card.setList1(list1);
-                            card.setList2(list2);
+                            Random generator2 = new Random();
+                            Integer value2 = generator.nextInt(2) + 1;
+                            System.out.println(value2);
                             Users thisu = (Users) ois.readObject();
                             Users u = (Users) ois.readObject();
-                            clientMap.get(thisu.getHoten()).getOos().writeUTF("accept1");
-                            clientMap.get(thisu.getHoten()).getOos().writeObject(u);
-                            clientMap.get(thisu.getHoten()).getOos().writeObject(card);
-                            clientMap.get(u.getHoten()).getOos().writeUTF("accept2");
-                            clientMap.get(u.getHoten()).getOos().writeObject(thisu);
-                            clientMap.get(u.getHoten()).getOos().writeObject(card);
-                            pairs.add(new Pair<>(clientMap.get(thisu.getHoten()),clientMap.get(u.getHoten())));
+                            clientMap.get(thisu.getUsername()).getOos().writeUTF("begin");
+                            clientMap.get(thisu.getUsername()).getOos().writeObject(u);
+                            clientMap.get(thisu.getUsername()).getOos().writeObject(a);
+                            clientMap.get(thisu.getUsername()).getOos().writeObject(value2);
+                            clientMap.get(u.getUsername()).getOos().writeUTF("begin");
+                            clientMap.get(u.getUsername()).getOos().writeObject(thisu);
+                            clientMap.get(u.getUsername()).getOos().writeObject(a);
+                            clientMap.get(u.getUsername()).getOos().writeObject(value2);
+                            pairs.add(new Pair<>(clientMap.get(thisu.getUsername()),clientMap.get(u.getUsername())));
                             db.updateStatus(u,2);
                             db.updateStatus(thisu, 2);
                             updateOnlineUsers();
@@ -268,27 +325,27 @@ public class ServerControl {
                         synchronized(lock){
                             Users thisu = (Users) ois.readObject();
                             Users u = (Users) ois.readObject();
-                            clientMap.get(thisu.getHoten()).getOos().writeUTF("not accept");
-                            clientMap.get(thisu.getHoten()).getOos().writeObject(u);
-//                            clientMap.get(u.getHoten()).getOos().writeUTF("not accept");
-//                            clientMap.get(u.getHoten()).getOos().writeObject(thisu);
+                            clientMap.get(thisu.getUsername()).getOos().writeUTF("not accept");
+                            clientMap.get(thisu.getUsername()).getOos().writeObject(u);
+//                            clientMap.get(u.getUsername()).getOos().writeUTF("not accept");
+//                            clientMap.get(u.getUsername()).getOos().writeObject(thisu);
                         }
                         //updateOnlineUsers();
                     }
                     else if(rq.equals("Calculate")){
                         synchronized(lock){
                             Users user = (Users) ois.readObject();
-                            Handler temp=clientMap.get(user.getHoten());
+                            Handler temp=clientMap.get(user.getUsername());
                             
                             for(Pair<Handler,Handler>i:pairs){
-                                if(i.getKey().getUser().getHoten().equals(temp.getUser().getHoten())){
+                                if(i.getKey().getUser().getUsername().equals(temp.getUser().getUsername())){
                                     i.getKey().getUser().setFi_time(user.getFi_time());
                                     temp_pair = i;
                                     i.getKey().getUser().setCheck(1);
                                     System.out.println("1");
                                     break;
                                 }
-                                if(i.getValue().getUser().getHoten().equals(temp.getUser().getHoten())){
+                                if(i.getValue().getUser().getUsername().equals(temp.getUser().getUsername())){
                                     i.getValue().getUser().setFi_time(user.getFi_time());
                                     temp_pair = i;
                                     i.getValue().getUser().setCheck(1);
@@ -312,7 +369,7 @@ public class ServerControl {
                                     temp_pair.getValue().oos.writeUTF("result");
                                     temp_pair.getValue().oos.writeObject("YOU LOSE");
                                     db.updatePoints(temp_pair.getKey().getUser(), 1);
-                                    System.out.println(temp_pair.getKey().getUser().getHoten()+"win");
+                                    System.out.println(temp_pair.getKey().getUser().getUsername()+"win");
                                 }
                                 else if(t1>t2){
                                     temp_pair.getKey().oos.writeUTF("result");
@@ -320,7 +377,7 @@ public class ServerControl {
                                     temp_pair.getValue().oos.writeUTF("result");
                                     temp_pair.getValue().oos.writeObject("YOU WIN");
                                     db.updatePoints(temp_pair.getValue().getUser(), 1);
-                                    System.out.println(temp_pair.getKey().getUser().getHoten()+"lose");
+                                    System.out.println(temp_pair.getKey().getUser().getUsername()+"lose");
                                     //System.out.println("lose");
                                 }
                                 else{
@@ -351,14 +408,13 @@ public class ServerControl {
 //                                }
 //                                pairs.remove(temp_pair);
                             }
-                            
                         }
                         
                     }
                     else if(rq.equals("play again")){
                         synchronized(lock){
                             Users user = (Users) ois.readObject();
-                            Handler temp=clientMap.get(user.getHoten());
+                            Handler temp=clientMap.get(user.getUsername());
                             if(temp_pair.getKey().equals(temp)){
                                 temp_pair.getKey().getUser().setCheck(2);
                             }
@@ -379,7 +435,7 @@ public class ServerControl {
                     else if(rq.equals("quit")){
                         synchronized(lock){
                             Users user = (Users) ois.readObject();
-                            Handler temp=clientMap.get(user.getHoten());
+                            Handler temp=clientMap.get(user.getUsername());
                             if(temp_pair.getKey().equals(temp)){
                                 temp_pair.getKey().getUser().setCheck(3);
                             }

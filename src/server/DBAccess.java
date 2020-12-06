@@ -131,6 +131,7 @@ import java.util.logging.Logger;
                 if (rs3.next()) {
                     Users u3 = new Users();
                     u3.setId(rs3.getInt("id"));
+                    u3.setUsername(rs3.getString("username"));
                     u3.setHoten(rs3.getString("hoten"));
                     u3.setPoints(rs3.getFloat("points"));
                     u3.setIsOnl(rs3.getInt("isOnl"));
@@ -145,6 +146,17 @@ import java.util.logging.Logger;
         return lu;
     }
 
+    public void endMatch(Users p){
+        String sql = "UPDATE users SET isOnl=1 WHERE username=?";
+        try {
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, p.getUsername());
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public void logOut(Users p) {
         String sql = "UPDATE users SET isOnl=0 WHERE hoten=?";
         try {
@@ -186,11 +198,11 @@ import java.util.logging.Logger;
     }
     public void updatePoints(Users u,float p){
         try{
-            String sql="UPDATE users SET points=? WHERE hoten=?";
+            String sql="UPDATE users SET points=? WHERE username=?";
             PreparedStatement ps=con.prepareStatement(sql);
             float temp=u.getPoints()+p;
             ps.setFloat(1, temp);
-            ps.setString(2, u.getHoten());
+            ps.setString(2, u.getUsername());
             ps.executeUpdate();
         }
         catch(Exception e){
@@ -198,11 +210,11 @@ import java.util.logging.Logger;
         }
     }
     public void updateStatus(Users u,int status){
-        String sql = "UPDATE users SET isOnl=? WHERE hoten=?";
+        String sql = "UPDATE users SET isOnl=? WHERE username=?";
         try {
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, status);
-            ps.setString(2, u.getHoten());
+            ps.setString(2, u.getUsername());
             ps.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();

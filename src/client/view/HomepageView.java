@@ -100,7 +100,7 @@ public class HomepageView extends javax.swing.JFrame{
                 if(status.equals("Online")){
                     String hoten = (String) tblF.getModel().getValueAt(row, 0);
                     Users user = new Users();
-                    user.setHoten(hoten);
+                    user.setUsername(hoten);
                     control.sendData("challenge", u);
                     control.sendData(user);
                 }
