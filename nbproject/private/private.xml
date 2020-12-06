@@ -3,8 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/tieng/Downloads/BTL_LTM/src/client/control/ClientControl.java</file>
-            <file>file:/C:/Users/tieng/Downloads/BTL_LTM/src/client/view/ViewGame.java</file>
+            <file>file:/C:/Users/tieng/OneDrive/Documents/GitHub/Laptrinhmang/src/client/control/ClientControl.java</file>
+            <file>file:/C:/Users/tieng/OneDrive/Documents/GitHub/Laptrinhmang/src/server/ServerControl.java</file>
+            <file>file:/C:/Users/tieng/OneDrive/Documents/GitHub/Laptrinhmang/src/Main/ServerMain.java</file>
+            <file>file:/C:/Users/tieng/OneDrive/Documents/GitHub/Laptrinhmang/src/model/Users.java</file>
+            <file>file:/C:/Users/tieng/OneDrive/Documents/GitHub/Laptrinhmang/src/client/view/LoginView.java</file>
+            <file>file:/C:/Users/tieng/OneDrive/Documents/GitHub/Laptrinhmang/src/server/DBAccess.java</file>
         </group>
     </open-files>
 </project-private>
