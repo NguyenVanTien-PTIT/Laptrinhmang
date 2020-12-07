@@ -36,7 +36,7 @@ public class ChallengeFrm extends javax.swing.JFrame{
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        txt1.setText("Do you accept the challenge from ");
+        txt1.setText("Do you accept the challenge from");
 
         no.setText("NO");
         no.addActionListener(new java.awt.event.ActionListener() {

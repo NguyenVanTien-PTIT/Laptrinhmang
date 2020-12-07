@@ -6,7 +6,6 @@
 package model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  *
@@ -24,7 +23,15 @@ public class Users implements Serializable{
     private int check;
     private long totaltime;
     private int games;
-    private ArrayList<Users>lu;
+     private String email;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
     public Users(String hoten, String username, String pass,float points,long totaltime,int games) {
         this.hoten = hoten;
         this.username = username;
@@ -67,15 +74,7 @@ public class Users implements Serializable{
         this.totaltime=0;
         this.games=0;
     }
-    
-    public void setLu(ArrayList<Users> lu) {
-        this.lu = lu;
-    }
-    
-    public ArrayList<Users> getLu() {
-        return lu;
-    }
-    
+
     public int getCheck() {
         return check;
     }

@@ -81,6 +81,17 @@ public class HomepageView extends javax.swing.JFrame{
                 control.sendData("log out", u);
             }
         });
+        // add friend event
+        btnAdd.addActionListener((e) -> {
+            if (txtAdd.getText().equals(u.getHoten())) {
+                JOptionPane.showMessageDialog(rootPane, "You can not add yourself to your friends list");
+            } else {
+                Users user = new Users();
+                user.setUsername(txtAdd.getText());
+                control.sendData("add friend", u);
+                control.sendData(user);
+            }
+        });
         // challenge event 
         tblF.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e){
@@ -89,7 +100,7 @@ public class HomepageView extends javax.swing.JFrame{
                 if(status.equals("Online")){
                     String hoten = (String) tblF.getModel().getValueAt(row, 0);
                     Users user = new Users();
-                    user.setUsername(hoten);
+                    user.setHoten(hoten);
                     control.sendData("challenge", u);
                     control.sendData(user);
                 }
@@ -136,10 +147,13 @@ public class HomepageView extends javax.swing.JFrame{
         jTextArea1 = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        jSplitPane2 = new javax.swing.JSplitPane();
         lbName = new JTextField("Name: ");
         lbPoints = new javax.swing.JTextField();
         tblPanel = new javax.swing.JPanel();
-        btnBXH = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        txtAdd = new javax.swing.JTextField();
+        btnAdd = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
@@ -259,10 +273,18 @@ public class HomepageView extends javax.swing.JFrame{
             .addGap(0, 259, Short.MAX_VALUE)
         );
 
-        btnBXH.setText("Bảng xếp hạng");
-        btnBXH.addActionListener(new java.awt.event.ActionListener() {
+        jLabel3.setText("THÊM BẠN");
+
+        txtAdd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBXHActionPerformed(evt);
+                txtAddActionPerformed(evt);
+            }
+        });
+
+        btnAdd.setText("THÊM");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
             }
         });
 
@@ -277,30 +299,40 @@ public class HomepageView extends javax.swing.JFrame{
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(55, 55, 55)
-                                .addComponent(jLabel2))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(55, 55, 55)
+                                        .addComponent(jLabel2))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(61, 61, 61)
+                                        .addComponent(jLabel4)))
+                                .addGap(0, 35, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(61, 61, 61)
-                                .addComponent(jLabel4)))
-                        .addGap(0, 35, Short.MAX_VALUE))
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lbPoints)
+                                    .addComponent(lbName)
+                                    .addComponent(txtAdd)
+                                    .addComponent(btnAdd, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGap(18, 18, 18))
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lbPoints)
-                            .addComponent(lbName)
-                            .addComponent(btnBXH, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGap(44, 44, 44)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addComponent(jSplitPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(166, 166, 166)
+                        .addGap(136, 136, 136)
                         .addComponent(jLabel1)
                         .addContainerGap(143, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(36, 36, 36)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(tblPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSplitPane2)
             .addGroup(layout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -319,28 +351,32 @@ public class HomepageView extends javax.swing.JFrame{
                         .addGap(4, 4, 4)
                         .addComponent(lbPoints, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnBXH)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtAdd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnAdd)
                         .addGap(46, 46, 46))))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnBXHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBXHActionPerformed
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         // TODO add your handling code here:
-        JOptionPane.showMessageDialog(rootPane, "BXH");
-        ViewBXH vbxh= new ViewBXH();
-        vbxh.setVisible(true);
-        vbxh.setLocationRelativeTo(rootPane);
-  //      this.dispose();
-                                            
 
-    }//GEN-LAST:event_btnBXHActionPerformed
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    private void txtAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAddActionPerformed
+        // TODO add your handling code here:
+        txtAdd.setText("");
+    }//GEN-LAST:event_txtAddActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnBXH;
+    private javax.swing.JButton btnAdd;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -350,6 +386,7 @@ public class HomepageView extends javax.swing.JFrame{
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JSplitPane jSplitPane2;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
     private javax.swing.JTable jTable3;
@@ -365,5 +402,6 @@ public class HomepageView extends javax.swing.JFrame{
     private javax.swing.JLabel points;
     private java.awt.ScrollPane scrollPane1;
     private javax.swing.JPanel tblPanel;
+    private javax.swing.JTextField txtAdd;
     // End of variables declaration//GEN-END:variables
 }
