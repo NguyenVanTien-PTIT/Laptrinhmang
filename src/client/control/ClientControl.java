@@ -4,8 +4,6 @@
  * and open the template in the editor.
  */
 package client.control;
-//import View.GameFrm;
-import model.FriendsList;
 import model.Users;
 import client.view.ChallengeFrm;
 import client.view.ViewGameFrm;
@@ -16,6 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -24,7 +23,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import model.Card;
 
 /**
  *
@@ -40,7 +38,6 @@ public class ClientControl extends Thread{
     Vector vcData;
     Vector vcHead;
     JTable tblFriends;
-    
     public Users getUser() {
         return user;
     }
@@ -73,7 +70,16 @@ public class ClientControl extends Thread{
 
         }
     }
-
+    public void sendEmailtoServer(String email ){
+        try {
+            Users users = new Users();
+            users.setEmail(email);
+            oos.writeUTF("sendEmailtoServer");
+            oos.writeObject(users);
+            oos.flush();
+        } catch (Exception e) {
+        }
+    }
     public void closeConnection() {
         try {
             mySocket.close();
@@ -89,16 +95,6 @@ public class ClientControl extends Thread{
             oos.flush();
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-    public void sendEmailtoServer(String email ){
-        try {
-            Users users = new Users();
-            users.setEmail(email);
-            oos.writeUTF("sendEmailtoServer");
-            oos.writeObject(users);
-            oos.flush();
-        } catch (Exception e) {
         }
     }
     
@@ -148,14 +144,14 @@ public class ClientControl extends Thread{
                 ViewGameFrm game=null;
                 String rq = ois.readUTF();
                 if (rq.equals("online user")) {
-                    FriendsList fl = (FriendsList) ois.readObject();
-                    setModel(fl);
+                    Users u1 = (Users) ois.readObject();
+//                    FriendsList fl = (FriendsList) ois.readObject();
+                    setModel(u1);
                 } else if (rq.equals("Add friend successfully")) {
                     JOptionPane.showMessageDialog(tblFriends, rq);
                 } else if (rq.equals("Add friend fail")) {
                     JOptionPane.showMessageDialog(tblFriends, rq);
-                } 
-                else if (rq.equals("Value doesn't exist")) {
+                } else if (rq.equals("Value doesn't exist")) {
                     JOptionPane.showMessageDialog(tblFriends, rq);
                 } else if (rq.equals("challenge")) {
                     Users thisu = (Users) ois.readObject();
@@ -163,7 +159,7 @@ public class ClientControl extends Thread{
                     ChallengeFrm c = new ChallengeFrm();
                     c.setVisible(true);
                     c.setLocationRelativeTo(tblFriends);
-                    c.getTxt1().setText(c.getTxt1().getText()+user.getHoten());
+                    c.getTxt1().setText(c.getTxt1().getText()+thisu.getUsername());
                     c.getYes().addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
@@ -183,21 +179,28 @@ public class ClientControl extends Thread{
                         }
                     });
                     
-                } else if(rq.equals("accept1")){
+                } else if(rq.equals("begin")){
 //                    System.out.println("loading game...");
 //                    Users u=(Users) ois.readObject();
-//                    //JOptionPane.showMessageDialog(tblFriends, "READY?");
+                    //JOptionPane.showMessageDialog(tblFriends, "READY?");
 //                    Matranhinh mt=(Matranhinh) ois.readObject();
 //                    game = new GameFrm(mt);
 //                    game.setLbname("Name: "+u.getHoten());
 //                    game.setVisible(true);
 //                    game.setLocationRelativeTo(tblFriends);
-//
+
+                    System.out.println("loading game...");
+                    Users u1 = (Users) ois.readObject();
+                    List<Integer> a = (List<Integer>) ois.readObject();
+                    Integer img = (Integer) ois.readObject();
+                    game=new ViewGameFrm(u1, ois, oos, a, img);
+                    game.setVisible(true);
+                    game.setLocationRelativeTo(tblFriends);
 //                    while(true){
 //                        sleep(1000);
-//                        if(game.getFi_Time()!=-1){
+//                        if(u1.getFi_time()!="-1"){
 //                            //System.out.println("2");
-//                            Long time=game.getFi_Time();
+//                            String time=u1.getFi_time();
 //                            this.user.setFi_time(time);
 //                            sendData("Calculate",this.user);
 //                            String rq1=ois.readUTF();
@@ -217,53 +220,28 @@ public class ClientControl extends Thread{
 //                            break;
 //                        }
 //                    }
-                   System.out.println("loading game...");
-                    Users u=(Users) ois.readObject();
-                    //JOptionPane.showMessageDialog(tblFriends, "READY?");
-                    Card card=(Card) ois.readObject();
-                    game=new ViewGameFrm();
-                    //game.init(card.getList1());
-                  //  game = new GameFrm(mt);
-                   // game.setLbname("Name: "+u.getHoten());
-                    game.setVisible(true);
-                    game.setLocationRelativeTo(tblFriends);
-                }else if(rq.equals("accept2")){
-                    System.out.println("loading game...");
-                    Users u=(Users) ois.readObject();
-                    //JOptionPane.showMessageDialog(tblFriends, "READY?");
-                    Card card=(Card) ois.readObject();
-                    game=new ViewGameFrm();
-                  //  game.init(card.getList2());
-                  //  game = new GameFrm(mt);
-                   // game.setLbname("Name: "+u.getHoten());
-                    game.setVisible(true);
-                    game.setLocationRelativeTo(tblFriends);
                 }
                 else if(rq.equals("not accept")){
                     Users u=(Users) ois.readObject();
-                    JOptionPane.showMessageDialog(tblFriends, u.getHoten()+" has refused your challenge!");
+                    JOptionPane.showMessageDialog(tblFriends, u.getUsername()+" has refused your challenge!");
                 }
-//                else if(rq.equals("Wait")){
-//                    JOptionPane.showMessageDialog(tblFriends, "Wait For the opponent...");
-//                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
-    
 
-    public void setModel(FriendsList fl) {
+    public void setModel(Users ul) {
         vcData = new Vector();
-        ArrayList<Users> lf = fl.getLf();
+        ArrayList<Users> lu = ul.getLu();
         vcHead = new Vector();
         vcHead.add("Player");
         vcHead.add("Points");
         vcHead.add("Status");
-        for (Users u : lf) {
-            if (u.getHoten() != getUser().getHoten()) {
+        for (Users u : lu) {
+            if (u.getUsername() != getUser().getUsername() && u.getId()!= this.getUser().getId()) {
                 Vector row = new Vector();
-                row.add(u.getHoten());
+                row.add(u.getUsername());
                 row.add(u.getPoints());
                 if (u.getIsOnl() == 1) {
                     row.add("Online");
@@ -278,7 +256,5 @@ public class ClientControl extends Thread{
         }
         tblFriends.setModel(new DefaultTableModel(vcData, vcHead));
         tblFriends.setEnabled(true);
-
     }
-
 }

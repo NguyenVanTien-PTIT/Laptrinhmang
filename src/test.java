@@ -1,4 +1,5 @@
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,23 +14,27 @@ import java.util.Set;
 
 public class test {
     public static void main(String[] args) {
-        Set<Integer> set = new HashSet<>();
-        Random generator = new Random();
-        List<Integer> a = new ArrayList<>();
-        int size = 0;
-        while(true){
-            Integer value = generator.nextInt(25) + 1;
-            set.add(value);
-            if(set.size()>size) {
-                a.add(value);
-                size = set.size();
+        String text = "00:00:00:88";
+        String text2 = "00:00:00:86";
+        String[] arStr = text.split("\\:");
+        for(int i=0;i<4;i++){
+            System.out.println(Integer.parseInt(arStr[i]));
+        }
+        String[] arStr2 = text2.split("\\:");
+        for(int i=0;i<4;i++){
+            System.out.println(Integer.parseInt(arStr2[i]));
+        }
+        for (int i=0;i<4;i++) {
+            if(Integer.parseInt(arStr[i])> Integer.parseInt(arStr2[i])){
+                System.out.printf("1 lon hon"+i);
+                break;
+            }else{
+                if(Integer.parseInt(arStr[i])<Integer.parseInt(arStr2[i])){
+                    System.out.printf("2 lon hon"+i);
+                    break;
+                }
             }
-            if(set.size()==25) break;
-            
-        }
-        for (Integer integer : a) {
-            System.out.print(integer+" ");
-        }
+	}
     }
 //    private void shuffleArray(int[] array)
 //    {

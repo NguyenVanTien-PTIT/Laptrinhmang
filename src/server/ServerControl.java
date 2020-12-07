@@ -5,26 +5,26 @@
  */
 package server;
 //import Model.Matranhinh;
-
 import java.awt.Button;
+import java.awt.Color;
 import java.awt.Image;
-import model.FriendsList;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import model.Users;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.PasswordAuthentication;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
-import java.util.function.Consumer;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
@@ -34,33 +34,76 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import model.Card;
-import sun.misc.BASE64Encoder;
-
 /**
  *
  * @author ----LaiNhuTung----
  */
-public class ServerControl {
+class MyButton extends JButton {
 
-    private int port = 1080;
+    private boolean isLastButton;
+
+    public MyButton() {
+
+        super();
+
+        initUI();
+    }
+
+    public MyButton(Image image) {
+
+        super(new ImageIcon(image));
+
+        initUI();
+    }
+
+    private void initUI() {
+
+        isLastButton = false;
+        BorderFactory.createLineBorder(Color.gray);
+
+        addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                setBorder(BorderFactory.createLineBorder(Color.yellow));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                setBorder(BorderFactory.createLineBorder(Color.gray));
+            }
+        });
+    }
+
+    public void setLastButton() {
+        
+        isLastButton = true;
+    }
+
+    public boolean isLastButton() {
+
+        return isLastButton;
+    }
+}
+
+public class ServerControl {
+     private int port = 1080;
     private ServerSocket serverSocket;
     private DBAccess db;
     HashMap<String, Handler> clientMap;
     Object lock;
-    ArrayList<Pair<Handler, Handler>> pairs;
-    
+    ArrayList<Pair<Handler,Handler>>pairs;
     public ServerControl() throws MessagingException {
         lock = new Object();
         db = new DBAccess();
-       
         openConnection();
-        
         clientMap = new HashMap<>();
-        pairs = new ArrayList<>();
+        pairs=new ArrayList<>();
         while (true) {
+
             listening();
         }
     }
@@ -81,8 +124,6 @@ public class ServerControl {
         }
     }
 
-   
-
     private void listening() throws MessagingException {
         try {
             Socket client = serverSocket.accept();
@@ -93,10 +134,10 @@ public class ServerControl {
             if (rc.equals("login")) {
                 System.out.println(u.getUsername());
                 if (db.checkUser(u)) {
-
+                    
                     Handler handler = new Handler(u, lock, ois, oos);
                     handler.setSocket(client);
-                    clientMap.put(u.getHoten(), handler);
+                    clientMap.put(u.getUsername(), handler);
 
                     oos.writeUTF("Login Successfully");
                     oos.writeObject(u);
@@ -117,7 +158,7 @@ public class ServerControl {
                     oos.writeObject("Signup Fail");
                     oos.flush();
                 }
-            } else if (rc.equals("sendEmailtoServer")) {
+            }else if (rc.equals("sendEmailtoServer")) {
                 Properties pro = System.getProperties();
                 pro.put("mail.smtp.host", "smtp.gmail.com");
                 pro.put("mail.smtp.port", "465");
@@ -191,9 +232,9 @@ public class ServerControl {
             for (Map.Entry<String, Handler> entry : clientMap.entrySet()) {
                 Handler value = entry.getValue();
                 value.getOos().writeUTF("online user");
-                FriendsList fl = new FriendsList(value.getUser());
-                fl.setLf(db.listFr(value.getUser()));
-                value.getOos().writeObject(fl);
+                Users ul = new Users();
+                ul.setLu(db.listUsers());
+                value.getOos().writeObject(ul);
                 value.getOos().flush();
             }
         } catch (Exception e) {
@@ -208,7 +249,7 @@ public class ServerControl {
         ObjectOutputStream oos;
         Socket socket;
         Users user;
-
+        
         public Handler(Users user, Object lock, ObjectInputStream ois, ObjectOutputStream oos) {
             this.user = user;
             this.lock = lock;
@@ -244,7 +285,7 @@ public class ServerControl {
 
         @Override
         public void run() {
-            Pair<Handler, Handler> temp_pair = null;
+            Pair<Handler,Handler> temp_pair=null;
             while (true) {
                 try {
                     String rq = ois.readUTF();
@@ -252,98 +293,129 @@ public class ServerControl {
                     if (rq.equals("log out")) {
                         Users u = (Users) ois.readObject();
                         db.logOut(u);
-                        clientMap.remove(u.getHoten());
+                        clientMap.remove(u.getUsername());
                         updateOnlineUsers();
                         break;
-                    }  else if (rq.equals("challenge")) {
-                        synchronized (lock) {
+                    }
+                    else if (rq.equals("end match")){
+                        Users u = (Users) ois.readObject();
+                        db.endMatch(u);
+//                        clientMap.remove(u.getUsername());
+//                        updateOnlineUsers();
+                        break;
+                    }
+                    else if (rq.equals("add friend")) {
+                        Users thisu = (Users) ois.readObject();
+                        Users u = (Users) ois.readObject();
+                        if (db.checkUserExist2(u)) {
+                            if (db.addFriend(thisu, u)) {
+                                synchronized (lock) {
+                                    clientMap.get(thisu.getUsername()).getOos().writeUTF("Add friend successfully");
+                                }
+                                updateOnlineUsers();
+                            } else {
+                                synchronized (lock) {
+                                    clientMap.get(thisu.getUsername()).getOos().writeUTF("Add friend fail");
+                                }
+                                updateOnlineUsers();
+                            }
+                        } else {
+                            synchronized (lock) {
+                                clientMap.get(thisu.getUsername()).getOos().writeUTF("Value doesn't exist");
+                            }
+                            updateOnlineUsers();
+                        }
+                    } else if(rq.equals("challenge")){
+                        synchronized(lock){
                             Users thisu = (Users) ois.readObject();
                             Users u = (Users) ois.readObject();
-//                            clientMap.get(thisu.getHoten()).getOos().writeUTF("challenge");
-                            clientMap.get(u.getHoten()).getOos().writeUTF("challenge");
-                            clientMap.get(u.getHoten()).getOos().writeObject(thisu);
-                            clientMap.get(u.getHoten()).getOos().writeObject(u);
+//                            clientMap.get(thisu.getUsername()).getOos().writeUTF("challenge");
+                            clientMap.get(u.getUsername()).getOos().writeUTF("challenge");
+                            clientMap.get(u.getUsername()).getOos().writeObject(thisu);
+                            clientMap.get(u.getUsername()).getOos().writeObject(u);
                         }
 //                        updateOnlineUsers();
-                    } else if (rq.equals("accept")) {
+                    } 
+                    
+                    else if(rq.equals("accept")){
 //                        synchronized(lock){
 //                            Users thisu = (Users) ois.readObject();
 //                            Matranhinh mt = new Matranhinh(4, 31);
 //                            db.sinhngaunhien(mt);
 //                            Users u = (Users) ois.readObject();
-//                            clientMap.get(thisu.getHoten()).getOos().writeUTF("accept");
-//                            clientMap.get(thisu.getHoten()).getOos().writeObject(u);
-//                            clientMap.get(thisu.getHoten()).getOos().writeObject(mt);
-//                            clientMap.get(u.getHoten()).getOos().writeUTF("accept");
-//                            clientMap.get(u.getHoten()).getOos().writeObject(thisu);
-//                            clientMap.get(u.getHoten()).getOos().writeObject(mt);
-//                            pairs.add(new Pair<>(clientMap.get(thisu.getHoten()),clientMap.get(u.getHoten())));
+//                            clientMap.get(thisu.getUsername()).getOos().writeUTF("accept");
+//                            clientMap.get(thisu.getUsername()).getOos().writeObject(u);
+//                            clientMap.get(thisu.getUsername()).getOos().writeObject(mt);
+//                            clientMap.get(u.getUsername()).getOos().writeUTF("accept");
+//                            clientMap.get(u.getUsername()).getOos().writeObject(thisu);
+//                            clientMap.get(u.getUsername()).getOos().writeObject(mt);
+//                            pairs.add(new Pair<>(clientMap.get(thisu.getUsername()),clientMap.get(u.getUsername())));
 //                            db.updateStatus(u,2);
 //                            db.updateStatus(thisu, 2);
 //                            updateOnlineUsers();
 //                        }
                         //updateOnlineUsers();
-                        synchronized (lock) {
-                            ArrayList<JButton> list = new ArrayList<>();
-                            ArrayList<JButton> list1 = new ArrayList<>();
-                            ArrayList<JButton> list2 = new ArrayList<>();
-                            for (int i = 1; i <= 14; i++) {
-                                JButton button;
-                                String s = "src/Image/" + i + ".png";
-                                button = new JButton(new ImageIcon(s));
-                                list.add(button);
-                            }
-                            Collections.shuffle(list);
-                            for (int i = 0; i < 14; i++) {
-                                if (i < 7) {
-                                    list1.add(list.get(i));
-                                } else {
-                                    list2.add(list.get(i));
+                        synchronized(lock){
+                            Set<Integer> set = new HashSet<>();
+                            Random generator = new Random();
+                            List<Integer> a = new ArrayList<>();
+                            int size = 0;
+                            while(true){
+                                Integer value = generator.nextInt(24) + 1;
+                                set.add(value);
+                                if(set.size()>size) {
+                                    a.add(value);
+                                    size = set.size();
                                 }
+                                if(set.size()==24) break;
                             }
-                            Card card = new Card();
-                            card.setList(list);
-                            card.setList1(list1);
-                            card.setList2(list2);
+                            Random generator2 = new Random();
+                            Integer value2 = generator.nextInt(2) + 1;
+                            System.out.println(value2);
                             Users thisu = (Users) ois.readObject();
                             Users u = (Users) ois.readObject();
-                            clientMap.get(thisu.getHoten()).getOos().writeUTF("accept1");
-                            clientMap.get(thisu.getHoten()).getOos().writeObject(u);
-                            clientMap.get(thisu.getHoten()).getOos().writeObject(card);
-                            clientMap.get(u.getHoten()).getOos().writeUTF("accept2");
-                            clientMap.get(u.getHoten()).getOos().writeObject(thisu);
-                            clientMap.get(u.getHoten()).getOos().writeObject(card);
-                            pairs.add(new Pair<>(clientMap.get(thisu.getHoten()), clientMap.get(u.getHoten())));
-                            db.updateStatus(u, 2);
+                            clientMap.get(thisu.getUsername()).getOos().writeUTF("begin");
+                            clientMap.get(thisu.getUsername()).getOos().writeObject(u);
+                            clientMap.get(thisu.getUsername()).getOos().writeObject(a);
+                            clientMap.get(thisu.getUsername()).getOos().writeObject(value2);
+                            clientMap.get(u.getUsername()).getOos().writeUTF("begin");
+                            clientMap.get(u.getUsername()).getOos().writeObject(thisu);
+                            clientMap.get(u.getUsername()).getOos().writeObject(a);
+                            clientMap.get(u.getUsername()).getOos().writeObject(value2);
+                            pairs.add(new Pair<>(clientMap.get(thisu.getUsername()),clientMap.get(u.getUsername())));
+                            db.updateStatus(u,2);
                             db.updateStatus(thisu, 2);
                             updateOnlineUsers();
                         }
-                        // updateOnlineUsers();
-                    } else if (rq.equals("not accept")) {
-                        synchronized (lock) {
+                       // updateOnlineUsers();
+                    }
+                    else if(rq.equals("not accept")){
+                        synchronized(lock){
                             Users thisu = (Users) ois.readObject();
                             Users u = (Users) ois.readObject();
-                            clientMap.get(thisu.getHoten()).getOos().writeUTF("not accept");
-                            clientMap.get(thisu.getHoten()).getOos().writeObject(u);
-//                            clientMap.get(u.getHoten()).getOos().writeUTF("not accept");
-//                            clientMap.get(u.getHoten()).getOos().writeObject(thisu);
+                            clientMap.get(thisu.getUsername()).getOos().writeUTF("not accept");
+                            clientMap.get(thisu.getUsername()).getOos().writeObject(u);
+//                            clientMap.get(u.getUsername()).getOos().writeUTF("not accept");
+//                            clientMap.get(u.getUsername()).getOos().writeObject(thisu);
                         }
                         //updateOnlineUsers();
-                    } else if (rq.equals("Calculate")) {
-                        synchronized (lock) {
+                    }
+                    else if(rq.equals("Calculate")){
+                        synchronized(lock){
                             Users user = (Users) ois.readObject();
-                            Handler temp = clientMap.get(user.getHoten());
-
-                            for (Pair<Handler, Handler> i : pairs) {
-                                if (i.getKey().getUser().getHoten().equals(temp.getUser().getHoten())) {
-                                    i.getKey().getUser().setFi_time(user.getFi_time());
+                            String time = ois.readUTF();
+                            Handler temp=clientMap.get(user.getUsername());
+                            
+                            for(Pair<Handler,Handler>i:pairs){
+                                if(i.getKey().getUser().getUsername().equals(temp.getUser().getUsername())){
+                                    i.getKey().getUser().setFi_time(time);
                                     temp_pair = i;
                                     i.getKey().getUser().setCheck(1);
                                     System.out.println("1");
                                     break;
                                 }
-                                if (i.getValue().getUser().getHoten().equals(temp.getUser().getHoten())) {
-                                    i.getValue().getUser().setFi_time(user.getFi_time());
+                                if(i.getValue().getUser().getUsername().equals(temp.getUser().getUsername())){
+                                    i.getValue().getUser().setFi_time(time);
                                     temp_pair = i;
                                     i.getValue().getUser().setCheck(1);
                                     System.out.println("2");
@@ -355,39 +427,71 @@ public class ServerControl {
 //                                updateOnlineUsers();
 //                            }
                             System.out.println(temp_pair.getKey().getUser().getCheck());
-                            System.out.println(temp_pair.getValue().getUser().getCheck());
-                            if (temp_pair.getKey().getUser().getCheck() == 1 && temp_pair.getValue().getUser().getCheck() == 1) {
-                                long t1 = temp_pair.getKey().getUser().getFi_time();
-                                long t2 = temp_pair.getValue().getUser().getFi_time();
+                            System.out.println(temp_pair.getValue().getUser().getCheck());  
+                            if(temp_pair.getKey().getUser().getCheck()==1&&temp_pair.getValue().getUser().getCheck()==1){
+                                String t1=temp_pair.getKey().getUser().getFi_time();
+                                String t2=temp_pair.getValue().getUser().getFi_time();
                                 System.out.println("vao");
-                                if (t1 < t2) {
-                                    temp_pair.getKey().oos.writeUTF("result");
-                                    temp_pair.getKey().oos.writeObject("YOU WIN");
-                                    temp_pair.getValue().oos.writeUTF("result");
-                                    temp_pair.getValue().oos.writeObject("YOU LOSE");
-                                    db.updatePoints(temp_pair.getKey().getUser(), 1);
-                                    System.out.println(temp_pair.getKey().getUser().getHoten() + "win");
-                                } else if (t1 > t2) {
-                                    temp_pair.getKey().oos.writeUTF("result");
-                                    temp_pair.getKey().oos.writeObject("YOU LOSE");
-                                    temp_pair.getValue().oos.writeUTF("result");
-                                    temp_pair.getValue().oos.writeObject("YOU WIN");
-                                    db.updatePoints(temp_pair.getValue().getUser(), 1);
-                                    System.out.println(temp_pair.getKey().getUser().getHoten() + "lose");
-                                    //System.out.println("lose");
-                                } else {
-                                    temp_pair.getKey().oos.writeUTF("result");
-                                    temp_pair.getKey().oos.writeObject("TIE");
-                                    temp_pair.getValue().oos.writeUTF("result");
-                                    temp_pair.getValue().oos.writeObject("TIE");
-                                    db.updatePoints(temp_pair.getKey().getUser(), (float) 0.5);
-                                    db.updatePoints(temp_pair.getValue().getUser(), (float) 0.5);
-                                    //
+                                String[] arStr = t1.split("\\:");
+                                String[] arStr2 = t2.split("\\:");
+                                for (int i=0;i<4;i++) {
+                                    if(Integer.parseInt(arStr[i])> Integer.parseInt(arStr2[i])){
+                                        temp_pair.getKey().oos.writeUTF("result");
+                                        temp_pair.getKey().oos.writeObject("YOU LOSE");
+                                        temp_pair.getValue().oos.writeUTF("result");
+                                        temp_pair.getValue().oos.writeObject("YOU WIN");
+                                        db.updatePoints(temp_pair.getKey().getUser(), 1);
+                                        System.out.println(temp_pair.getKey().getUser().getUsername()+"win");
+                                        break;
+                                    }else{
+                                        if(Integer.parseInt(arStr[i])<Integer.parseInt(arStr2[i])){
+                                            temp_pair.getKey().oos.writeUTF("result");
+                                            temp_pair.getKey().oos.writeObject("YOU WIN");
+                                            temp_pair.getValue().oos.writeUTF("result");
+                                            temp_pair.getValue().oos.writeObject("YOU LOSE");
+                                            db.updatePoints(temp_pair.getKey().getUser(), 1);
+                                            System.out.println(temp_pair.getKey().getUser().getUsername()+"win");
+                                            break;
+                                        }else{
+                                            temp_pair.getKey().oos.writeUTF("result");
+                                            temp_pair.getKey().oos.writeObject("TIE");
+                                            temp_pair.getValue().oos.writeUTF("result");
+                                            temp_pair.getValue().oos.writeObject("TIE");
+                                            db.updatePoints(temp_pair.getKey().getUser(), (float) 0.5);
+                                            db.updatePoints(temp_pair.getValue().getUser(), (float) 0.5);
+                                        }
+                                    }
                                 }
-                                temp_pair.getKey().getUser().setFi_time(-1);
-                                temp_pair.getValue().getUser().setFi_time(-1);
-                                temp_pair.getKey().getUser().setCheck(0);
-                                temp_pair.getValue().getUser().setCheck(0);
+//                                if(t1<t2){
+//                                    temp_pair.getKey().oos.writeUTF("result");
+//                                    temp_pair.getKey().oos.writeObject("YOU WIN");
+//                                    temp_pair.getValue().oos.writeUTF("result");
+//                                    temp_pair.getValue().oos.writeObject("YOU LOSE");
+//                                    db.updatePoints(temp_pair.getKey().getUser(), 1);
+//                                    System.out.println(temp_pair.getKey().getUser().getUsername()+"win");
+//                                }
+//                                else if(t1>t2){
+//                                    temp_pair.getKey().oos.writeUTF("result");
+//                                    temp_pair.getKey().oos.writeObject("YOU LOSE");
+//                                    temp_pair.getValue().oos.writeUTF("result");
+//                                    temp_pair.getValue().oos.writeObject("YOU WIN");
+//                                    db.updatePoints(temp_pair.getValue().getUser(), 1);
+//                                    System.out.println(temp_pair.getKey().getUser().getUsername()+"lose");
+//                                    //System.out.println("lose");
+//                                }
+//                                else{
+//                                    temp_pair.getKey().oos.writeUTF("result");
+//                                    temp_pair.getKey().oos.writeObject("TIE");
+//                                    temp_pair.getValue().oos.writeUTF("result");
+//                                    temp_pair.getValue().oos.writeObject("TIE");
+//                                    db.updatePoints(temp_pair.getKey().getUser(), (float) 0.5);
+//                                    db.updatePoints(temp_pair.getValue().getUser(), (float) 0.5);
+//                                    //
+//                                }
+//                                temp_pair.getKey().getUser().setFi_time(-1);
+//                                temp_pair.getValue().getUser().setFi_time(-1);
+//                                temp_pair.getKey().getUser().setCheck(0);
+//                                temp_pair.getValue().getUser().setCheck(0);
 
 //                                if(temp_pair.getKey().getUser().getCheck()==2&&temp_pair.getValue().getUser().getCheck()==2){
 //                                    temp_pair.getKey().oos.writeUTF("accept");
@@ -403,20 +507,20 @@ public class ServerControl {
 //                                }
 //                                pairs.remove(temp_pair);
                             }
-
                         }
-
-                    } else if (rq.equals("play again")) {
-                        synchronized (lock) {
+                        
+                    }
+                    else if(rq.equals("play again")){
+                        synchronized(lock){
                             Users user = (Users) ois.readObject();
-                            Handler temp = clientMap.get(user.getHoten());
-                            if (temp_pair.getKey().equals(temp)) {
+                            Handler temp=clientMap.get(user.getUsername());
+                            if(temp_pair.getKey().equals(temp)){
                                 temp_pair.getKey().getUser().setCheck(2);
                             }
-                            if (temp_pair.getValue().equals(temp)) {
+                            if(temp_pair.getValue().equals(temp)){
                                 temp_pair.getValue().getUser().setCheck(2);
                             }
-                            if (temp_pair.getKey().getUser().getCheck() == 2 && temp_pair.getValue().getUser().getCheck() == 2) {
+                            if(temp_pair.getKey().getUser().getCheck()==2&&temp_pair.getValue().getUser().getCheck()==2){
                                 temp_pair.getKey().oos.writeUTF("accept");
                                 temp_pair.getKey().oos.writeObject(temp_pair.getKey().getUser());
                                 temp_pair.getValue().oos.writeUTF("accept");
@@ -426,17 +530,18 @@ public class ServerControl {
 
                             }
                         }
-                    } else if (rq.equals("quit")) {
-                        synchronized (lock) {
+                    }
+                    else if(rq.equals("quit")){
+                        synchronized(lock){
                             Users user = (Users) ois.readObject();
-                            Handler temp = clientMap.get(user.getHoten());
-                            if (temp_pair.getKey().equals(temp)) {
+                            Handler temp=clientMap.get(user.getUsername());
+                            if(temp_pair.getKey().equals(temp)){
                                 temp_pair.getKey().getUser().setCheck(3);
                             }
-                            if (temp_pair.getValue().equals(temp)) {
+                            if(temp_pair.getValue().equals(temp)){
                                 temp_pair.getValue().getUser().setCheck(3);
                             }
-                            if (temp_pair.getKey().getUser().getCheck() == 3 || temp_pair.getValue().getUser().getCheck() == 3) {
+                            if(temp_pair.getKey().getUser().getCheck()==3||temp_pair.getValue().getUser().getCheck()==3){
                                 temp_pair.getKey().oos.writeUTF("not accept");
                                 temp_pair.getKey().oos.writeObject(temp_pair.getKey().getUser());
                                 temp_pair.getValue().oos.writeUTF("not accept");

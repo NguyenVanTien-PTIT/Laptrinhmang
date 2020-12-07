@@ -6,6 +6,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  *
@@ -19,26 +20,19 @@ public class Users implements Serializable{
     private int isOnl;
     private int status;
     private float points;
-    private long fi_time;
+    private String fi_time;
     private int check;
     private long totaltime;
     private int games;
-     private String email;
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    private String email;
+    private ArrayList<Users>lu;
     public Users(String hoten, String username, String pass,float points,long totaltime,int games) {
         this.hoten = hoten;
         this.username = username;
         this.pass = pass;
         this.points=points;
         this.isOnl=0;
-        this.fi_time=-1;
+        this.fi_time="-1";
         this.check=0;
         this.status=0;
         this.totaltime=totaltime;
@@ -53,12 +47,20 @@ public class Users implements Serializable{
         this.status = status;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    
     
     public Users(String username, String pass) {
         this.username = username;
         this.pass = pass;
         this.isOnl=0;
-        this.fi_time=-1;
+        this.fi_time="-1";
         this.check=0;
         this.status=0;
         this.totaltime=0;
@@ -68,13 +70,21 @@ public class Users implements Serializable{
     public Users() {
         points=0;
         this.isOnl=0;
-        this.fi_time=-1;
+        this.fi_time="-1";
         this.check=0;
         this.status=0;
         this.totaltime=0;
         this.games=0;
     }
-
+    
+    public void setLu(ArrayList<Users> lu) {
+        this.lu = lu;
+    }
+    
+    public ArrayList<Users> getLu() {
+        return lu;
+    }
+    
     public int getCheck() {
         return check;
     }
@@ -100,11 +110,11 @@ public class Users implements Serializable{
         this.check = check;
     }
 
-    public long getFi_time() {
+    public String getFi_time() {
         return fi_time;
     }
 
-    public void setFi_time(long fi_time) {
+    public void setFi_time(String fi_time) {
         this.fi_time = fi_time;
     }
 
