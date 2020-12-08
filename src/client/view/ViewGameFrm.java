@@ -48,8 +48,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.plaf.RootPaneUI;
+import jdk.nashorn.internal.scripts.JO;
 import model.Users;
 import server.ServerControl;
+
 
 class MyButton extends JButton {
 
@@ -226,7 +228,45 @@ public class ViewGameFrm extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                win(u , ois,oos,a, img);
+                int w=win(img);
+                System.out.println(timeLabel.getText());
+                if(w==1){
+                    try {    
+                        oos.writeUTF("Calculate");
+                        oos.writeObject(u);
+                        oos.writeUTF(timeLabel.getText());
+                        oos.flush();
+//                        String rp= ois.readUTF();
+//                        if(rp.equals("result")){
+//                            String kq;
+//                            try {
+//                                kq = (String)ois.readObject();
+//                                if(kq.equals("YOU WIN")){
+//                                    int x=JOptionPane.showConfirmDialog(rootPane,kq+
+//                                        " .Bạn muốn chơi lại không?" ,"Thông Báo",JOptionPane.YES_NO_OPTION);
+//                                    if(x==0){
+//                                        oos.writeUTF("play again");
+//                                        oos.writeObject(u);
+//                                        oos.flush();
+//                                        
+//                                    }else if(x==1){
+//                                        oos.writeUTF("end match");
+//                                        oos.writeObject(u);
+//                                        oos.flush();
+//                                    }
+//                                }else if(kq.equals("YOU LOSE")){
+//                                    JOptionPane.showMessageDialog(rootPane, kq);
+//                                }
+//                            } catch (ClassNotFoundException ex) {
+//                                Logger.getLogger(ViewGameFrm.class.getName()).log(Level.SEVERE, null, ex);
+//                            }
+//                            
+//                        }
+                    } catch (IOException ex) {
+                        Logger.getLogger(ViewGameFrm.class.getName()).log(
+                                Level.SEVERE, null, ex);
+                    }
+                }
             }
         });
         add(test, BorderLayout.SOUTH);
@@ -273,7 +313,7 @@ public class ViewGameFrm extends JFrame {
         }
         
         pack();
-        setTitle("Puzzle");
+        setTitle("Puzzle: "+u.getUsername());
         setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -379,7 +419,7 @@ public class ViewGameFrm extends JFrame {
                     "Chúc mừng", JOptionPane.INFORMATION_MESSAGE);
         }
     }
-    private void win(Users u, ObjectInputStream ois, ObjectOutputStream oos, List<Integer> a, Integer img){
+    private int win(Integer img){
             panel.removeAll();
             panel.setBorder(BorderFactory.createLineBorder(Color.gray));
             panel.setLayout(new GridLayout(5, 5, 0, 0));
@@ -433,15 +473,8 @@ public class ViewGameFrm extends JFrame {
             
             JOptionPane.showMessageDialog(rootPane, "Bạn đã hoàn thành trong "+ this.timeLabel.getText()+" !",
                     "Chúc mừng", JOptionPane.INFORMATION_MESSAGE);
-            System.out.println(timeLabel.getText());
-        try {    
-            oos.writeUTF("Calculate");
-            oos.writeObject(u);
-            oos.writeUTF(timeLabel.getText());
-        } catch (IOException ex) {
-            Logger.getLogger(ViewGameFrm.class.getName()).log(
-                    Level.SEVERE, null, ex);
-        }
+//            System.out.println(timeLabel.getText());
+            return 1;
     }
 
     public static boolean compareList(List ls1, List ls2) {

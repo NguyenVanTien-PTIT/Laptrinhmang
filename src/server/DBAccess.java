@@ -19,9 +19,11 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.ResultGame;
+
 /**
  *
- * @author ----LaiNhuTung----
+ * @author tieng
  */
     public class DBAccess implements Serializable {
 
@@ -30,12 +32,9 @@ import java.util.logging.Logger;
     public DBAccess() {
         try {
             String dbURL = "jdbc:mysql://localhost:3306/btl";
-        //    String dbClass = "com.mysql.jdbc.Driver";
-         //   Class.forName(dbClass);
+
             con = DriverManager.getConnection(dbURL, "root", "123456");
 
-//        } catch (ClassNotFoundException ex) {
-//            Logger.getLogger(DBAccess.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
             Logger.getLogger(DBAccess.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -66,7 +65,7 @@ import java.util.logging.Logger;
         return false;
     }
 
-    public boolean checkUserExist(Users u) {
+    public boolean signup(Users u) {
         String sql = "SELECT * FROM users WHERE username=?";
         try {
             PreparedStatement ps = con.prepareStatement(sql);
@@ -75,7 +74,7 @@ import java.util.logging.Logger;
             if (rs.next()) {
                 return true;
             } else {
-                String sql1 = "INSERT INTO users(hoten,username,pass,points,isonl,status,games,totaltime) VALUES(?,?,?,?,?,?,?,?)";
+                String sql1 = "INSERT INTO users(hoten,username,pass,points,isonl,status,games,totaltime,email) VALUES(?,?,?,?,?,?,?,?,?)";
                 PreparedStatement ps1 = con.prepareStatement(sql1);
                 ps1.setString(1, u.getHoten());
                 ps1.setString(2, u.getUsername());
@@ -85,6 +84,7 @@ import java.util.logging.Logger;
                 ps1.setInt(6, 0);
                 ps1.setInt(7, 0);
                 ps1.setInt(8, 0);
+                ps1.setString(9, u.getEmail());
                 ps1.executeUpdate();
                 return false;
             }
@@ -132,23 +132,7 @@ import java.util.logging.Logger;
     }
     
     
-    public boolean checkUserExist2(Users u) {
-        String sql = "SELECT * FROM users WHERE username=?";
-        try {
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, u.getUsername());
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                u.setId(rs.getInt("id"));
-                u.setHoten(rs.getString("hoten"));
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return false;
-    }
+  
 
     public ArrayList<Users> listUsers() {
         String sql1 = "SELECT * FROM users";
@@ -184,16 +168,58 @@ import java.util.logging.Logger;
         return lu;
     }
 
-    public void endMatch(Users p){
-        String sql = "UPDATE users SET isOnl=1 WHERE username=?";
+    //lay BXH
+    //point giam
+    public ArrayList<Users> getListRank() {
+        String sql1 = "SELECT * FROM users ORDER BY points DESC";
+        ArrayList<Users> lu = new ArrayList<>();
+                                                 
         try {
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, p.getUsername());
-            ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
+            PreparedStatement ps1= con.prepareStatement(sql1);
+            ResultSet rs1 = ps1.executeQuery();
+            while(rs1.next()){
+//                System.out.println(i);
+                Users user= new Users();
+                user.setId(rs1.getInt("id"));
+                user.setUsername(rs1.getString("username"));
+                user.setHoten(rs1.getString("hoten"));
+                user.setPoints(rs1.getFloat("points"));
+                lu.add(user);
+            } 
+            return lu;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBAccess.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return null;
     }
+    //thoi gian giam
+    public ArrayList<ResultGame> getListTime() {
+        String sql1 = "SELECT * FROM resultgame ORDER BY winner_fi_time ASC";
+        ArrayList<ResultGame> list = new ArrayList<>();
+                                                 
+        try {
+            PreparedStatement ps1= con.prepareStatement(sql1);
+            ResultSet rs1 = ps1.executeQuery();
+            while(rs1.next()){
+//                System.out.println(i);
+                ResultGame kq = new ResultGame();
+                kq.setIdRsGame(rs1.getInt("idResult"));
+                kq.setId1(rs1.getString("winner"));
+                kq.setId2(rs1.getString("loser"));
+                kq.setTimeWin(rs1.getString("winner_fi_time"));
+                kq.setTimeLose(rs1.getString("loser_fi_time"));
+//                user.setUsername(rs1.getString("username"));
+//                user.setHoten(rs1.getString("hoten"));
+//                user.setPoints(rs1.getFloat("points"));
+                list.add(kq);
+            } 
+            return list;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBAccess.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+  
     
     public void logOut(Users p) {
         String sql = "UPDATE users SET isOnl=0 WHERE hoten=?";
@@ -205,34 +231,6 @@ import java.util.logging.Logger;
             e.printStackTrace();
         }
 
-    }
-
-    public boolean addFriend(Users thisu, Users u) {
-        try {
-            String sql = "Select * from isfriend where (id1=? and id2=?) or (id2=? and id1=?)";
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, thisu.getId()+"");
-            ps.setString(2, u.getId()+"");
-            ps.setString(3, thisu.getId()+"");
-            ps.setString(4, u.getId()+"");
-            ResultSet rs = ps.executeQuery();
-            if(rs.next()){
-                System.out.println("lalalal");
-                return false;
-            }
-            else{
-                String sql1 = "Insert into isfriend value(?, ?)";
-                PreparedStatement ps1 = con.prepareStatement(sql1);
-                ps1.setString(1, thisu.getId() + "");
-                ps1.setString(2, u.getId() + "");
-                ps1.executeUpdate();
-                return true;
-            }
-                
-        } catch (SQLException ex) {
-            Logger.getLogger(ServerControl.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
     }
     public void updatePoints(Users u,float p){
         try{
@@ -258,31 +256,19 @@ import java.util.logging.Logger;
             e.printStackTrace();
         }
     }
-//    public void sinhngaunhien(Matranhinh mt) {
-//        int sz = mt.getSz() * mt.getSz();
-//        Random rd = new Random();
-//
-//        //Sinh ra so luong anh can thiet khong trung lap 
-//        Set<Integer> setsz = new HashSet<Integer>();
-//        while (setsz.size() < sz / 2) {
-//            setsz.add((rd.nextInt(rd.nextInt(Integer.MAX_VALUE)) % mt.getSla()));
-//        }
-//
-//        mt.getA().addAll(setsz);
-//        mt.getA().addAll(mt.getA());
-//        int id = 555;
-//
-//        //random lan nua de tranh doi xung
-//        for (int i = 0; i < mt.getA().size(); i++) {
-//          System.out.println(mt.getA().get(i));
-//        }
-//        while (id >= 0) {
-//            int x = rd.nextInt(mt.getA().size());
-//            int y = rd.nextInt(mt.getA().size());
-//            int tmp = mt.getA().get(x);
-//            mt.getA().set(x, mt.getA().get(y));
-//            mt.getA().set(y, tmp);
-//            id--;
-//        }
-//    }
+    public int insertResult(Users u, Users u2){
+        String sql = "INSERT INTO resultgame(winner, loser, winner_fi_time, loser_fi_time) VALUES (?, ?, ?, ?)";
+        try {
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, u.getUsername());
+            ps.setString(2, u2.getUsername());
+            ps.setString(3, u.getFi_time());
+            ps.setString(4, u2.getFi_time());
+            ps.executeUpdate();
+            return 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

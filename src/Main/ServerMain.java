@@ -8,7 +8,7 @@ import javax.mail.MessagingException;
 import server.ServerControl;
 /**
  *
- * @author ----LaiNhuTung----
+ * @author tieng
  */
 public class ServerMain {
      public static void main(String[] args) throws MessagingException {

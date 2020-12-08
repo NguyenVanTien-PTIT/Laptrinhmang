@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author ----LaiNhuTung----
+ * @author tieng
  */
 public class Users implements Serializable{
     private int id;
@@ -166,4 +166,10 @@ public class Users implements Serializable{
     public void setPass(String pass) {
         this.pass = pass;
     } 
+
+    @Override
+    public String toString() {
+        return username +  pass + email;
+    }
+    
 }

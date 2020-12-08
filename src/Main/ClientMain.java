@@ -5,9 +5,10 @@
  */
 package Main;
 import client.view.LoginView;
+
 /**
  *
- * @author ----LaiNhuTung----
+ * @author tieng
  */
 public class ClientMain {
     public static void main(String[] args) {
