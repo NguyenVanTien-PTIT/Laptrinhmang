@@ -1,7 +1,7 @@
 package client.view;
 
 import client.control.ClientControl;
-import model.Users;
+import server.model.Users;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -20,7 +20,7 @@ import javax.swing.table.TableCellRenderer;
 
 /**
  *
- * @author Lenovo
+ * @author tieng
  */
 public class HomepageView extends javax.swing.JFrame{
 
@@ -35,17 +35,18 @@ public class HomepageView extends javax.swing.JFrame{
     DefaultTableModel mod;
 
     public HomepageView(ClientControl control) {
+        setTitle(control.getUser().getUsername());
         initComponents();
         mod = new DefaultTableModel();
         this.control = control;
         u = control.getUser();
-        lbName.setText("Name: " + u.getHoten());
-        lbPoints.setText("Points: " + u.getPoints());
+        lbName.setText(u.getHoten());
+        lbPoints.setText(""+u.getPoints());
         lbName.setFont(new Font("Arial", Font.PLAIN, 18));
         lbPoints.setFont(new Font("Arial", Font.PLAIN, 18));
         lbName.setEditable(false);
         lbPoints.setEditable(false);
-        tblPanel.setLayout(null);
+//        tblPanel.setLayout(null);
 
         tblF = new JTable(mod) {
             @Override
@@ -56,10 +57,10 @@ public class HomepageView extends javax.swing.JFrame{
                 if (getValueAt(rowIndex, 2).toString().equalsIgnoreCase("Online")) {
                     component.setBackground(Color.GREEN);
                 } else if (getValueAt(rowIndex, 2).toString().equalsIgnoreCase("Offline")) {
-                    component.setBackground(Color.lightGray);
+                    component.setBackground(Color.gray);
                 }
                 else if (getValueAt(rowIndex, 2).toString().equalsIgnoreCase("Busy")){
-                    component.setBackground(Color.RED);
+                    component.setBackground(Color.ORANGE);
                 }
 
                 return component;
@@ -87,11 +88,17 @@ public class HomepageView extends javax.swing.JFrame{
                 int row = tblF.getSelectedRow();
                 String status=(String) tblF.getModel().getValueAt(row, 2);
                 if(status.equals("Online")){
-                    String hoten = (String) tblF.getModel().getValueAt(row, 0);
-                    Users user = new Users();
-                    user.setHoten(hoten);
-                    control.sendData("challenge", u);
-                    control.sendData(user);
+                    String username = (String) tblF.getModel().getValueAt(row, 0);
+                    Users u2 = new Users();
+                    u2.setUsername(username);
+//                    btnIvt.addMouseListener(new MouseAdapter() {
+//                        public void mouseClicked(MouseEvent e){
+                            control.sendData("challenge", u);
+                            control.sendData(u2);
+//                        }
+//                    });
+                }else{
+                    JOptionPane.showMessageDialog(rootPane, "Người chơi đang offline hoặc đang bận!");
                 }
             }
         });
@@ -139,8 +146,11 @@ public class HomepageView extends javax.swing.JFrame{
         lbName = new JTextField("Name: ");
         lbPoints = new javax.swing.JTextField();
         tblPanel = new javax.swing.JPanel();
-        btnBXH = new javax.swing.JButton();
+        btnBXHPoint = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
+        btnBXHTime = new javax.swing.JButton();
+        btnIvt = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -244,103 +254,144 @@ public class HomepageView extends javax.swing.JFrame{
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setText("DANH SÁCH ONLINE");
+        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel1.setText("Danh sách người chơi ");
 
-        jLabel2.setText("USERNAME");
+        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel2.setText("Tên tài khoản");
+
+        lbName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lbNameActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout tblPanelLayout = new javax.swing.GroupLayout(tblPanel);
         tblPanel.setLayout(tblPanelLayout);
         tblPanelLayout.setHorizontalGroup(
             tblPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 339, Short.MAX_VALUE)
         );
         tblPanelLayout.setVerticalGroup(
             tblPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 259, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
-        btnBXH.setText("Bảng xếp hạng");
-        btnBXH.addActionListener(new java.awt.event.ActionListener() {
+        btnBXHPoint.setText("Bảng xếp hạng điểm");
+        btnBXHPoint.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBXHActionPerformed(evt);
+                btnBXHPointActionPerformed(evt);
             }
         });
 
-        jLabel4.setText("POINTS");
+        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel4.setText("Điểm");
+
+        btnBXHTime.setText("Bảng xếp hạng thời gian");
+        btnBXHTime.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBXHTimeActionPerformed(evt);
+            }
+        });
+
+        btnIvt.setText("Mời chơi :");
+        btnIvt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnIvtActionPerformed(evt);
+            }
+        });
+
+        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel3.setText("Trang chủ");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(55, 55, 55)
-                                .addComponent(jLabel2))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(61, 61, 61)
-                                .addComponent(jLabel4)))
-                        .addGap(0, 35, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
+                                .addComponent(jLabel2)
+                                .addGap(8, 8, 8))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addGap(18, 18, 18)))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lbPoints)
-                            .addComponent(lbName)
-                            .addComponent(btnBXH, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(166, 166, 166)
-                        .addComponent(jLabel1)
-                        .addContainerGap(143, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(36, 36, 36)
-                        .addComponent(tblPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())))
+                            .addComponent(lbPoints, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lbName, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnIvt))
+                        .addGap(0, 29, Short.MAX_VALUE))
+                    .addComponent(btnBXHPoint, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnBXHTime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(29, 29, 29)
+                .addComponent(tblPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(64, 64, 64)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1)
+                .addGap(111, 111, 111))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(12, 12, 12)
-                        .addComponent(tblPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(5, 5, 5)
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lbName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel4)
-                        .addGap(4, 4, 4)
-                        .addComponent(lbPoints, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnBXH)
-                        .addGap(46, 46, 46))))
+                .addContainerGap()
+                .addComponent(jLabel3)
+                .addGap(33, 33, 33)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lbName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(lbPoints, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(btnIvt)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 59, Short.MAX_VALUE)
+                .addComponent(btnBXHPoint)
+                .addGap(18, 18, 18)
+                .addComponent(btnBXHTime)
+                .addGap(33, 33, 33))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addComponent(jLabel1)
+                .addGap(18, 18, 18)
+                .addComponent(tblPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnBXHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBXHActionPerformed
-        // TODO add your handling code here:
-        JOptionPane.showMessageDialog(rootPane, "BXH");
-        ViewBXH vbxh= new ViewBXH();
-        vbxh.setVisible(true);
-        vbxh.setLocationRelativeTo(rootPane);
-  //      this.dispose();
-                                            
+    private void btnBXHPointActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBXHPointActionPerformed
 
-    }//GEN-LAST:event_btnBXHActionPerformed
+        control.sendData("bxhScore",u);                                 
+
+    }//GEN-LAST:event_btnBXHPointActionPerformed
+
+    private void btnBXHTimeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBXHTimeActionPerformed
+        control.sendData("bxhTime",u);
+    }//GEN-LAST:event_btnBXHTimeActionPerformed
+
+    private void lbNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lbNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_lbNameActionPerformed
+
+    private void btnIvtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIvtActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnIvtActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnBXH;
+    private javax.swing.JButton btnBXHPoint;
+    private javax.swing.JButton btnBXHTime;
+    private javax.swing.JButton btnIvt;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
