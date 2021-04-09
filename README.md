@@ -1,2 +1,1 @@
-# Laptrinhmang
-Lập trình game ghép hình đối kháng online
+# Lập trình game ghép hình đối kháng online
