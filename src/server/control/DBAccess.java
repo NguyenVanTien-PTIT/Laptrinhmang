@@ -31,7 +31,6 @@ import server.model.ResultGame;
     public DBAccess() {
         try {
             String dbURL = "jdbc:mysql://localhost:3306/btl";
-
             con = DriverManager.getConnection(dbURL, "root", "142871134");
 
         } catch (SQLException ex) {

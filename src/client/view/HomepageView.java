@@ -85,7 +85,7 @@ public class HomepageView extends javax.swing.JFrame{
         // challenge event 
         tblF.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e){
-                int row = tblF.getSelectedRow();
+                int row = tblF.getSelectedRowCount();
                 String status=(String) tblF.getModel().getValueAt(row, 2);
                 if(status.equals("Online")){
                     String username = (String) tblF.getModel().getValueAt(row, 0);
@@ -97,8 +97,10 @@ public class HomepageView extends javax.swing.JFrame{
                             control.sendData(u2);
 //                        }
 //                    });
-                }else{
-                    JOptionPane.showMessageDialog(rootPane, "Người chơi đang offline hoặc đang bận!");
+                }else if(status.equals("busy")){
+                    JOptionPane.showMessageDialog(rootPane, "Người chơi đang bận!");
+                } else{
+                    JOptionPane.showMessageDialog(rootPane, "Người chơi đang offline");
                 }
             }
         });

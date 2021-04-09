@@ -7,6 +7,7 @@ package client.view;
 
 import java.util.ArrayList;
 import java.util.Vector;
+import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
 import server.model.Users;
 
@@ -26,6 +27,7 @@ public class ViewBXHScore extends javax.swing.JFrame {
         vtHeader.add("STT");
         vtHeader.add("Player");
         vtHeader.add("Points");
+        vtHeader.add(new JButton("Edit"));
         Vector vtData =new Vector();
         int i=1;
         for(Users x : list){
@@ -33,6 +35,7 @@ public class ViewBXHScore extends javax.swing.JFrame {
             vtRow.add(i);
             vtRow.add(x.getUsername());
             vtRow.add(x.getPoints());
+            vtRow.add(new JButton("Edit"));
             i++;
             vtData.add(vtRow);
         }
